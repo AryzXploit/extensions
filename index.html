@@ -1,65 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fake Location Permission Demo</title>
-  <style>
-    body { margin:0; font-family:Arial,sans-serif; background:#f9f9f9; }
-    .fake-banner {
-      position: fixed; top: 0; left: 0; width: 100%;
-      background: #fff; border-bottom: 1px solid #ccc;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      padding: 14px; font-size: 14px;
-      display: flex; justify-content: space-between; align-items: center;
-      z-index: 9999;
-    }
-    .domain { font-weight:bold; color:#222; }
-    .buttons { display:flex; gap:8px; }
-    .btn { padding:4px 12px; font-size:13px; border:none; border-radius:3px; cursor:pointer; }
-    .allow { background:#4285F4; color:white; }
-    .deny { background:#eee; color:#333; }
-    .content { margin-top:80px; text-align:center; }
-    .location-box {
-      margin-top:20px; padding:10px;
-      background:#fff; border:1px solid #ccc; border-radius:6px;
-      display:inline-block;
-    }
-  </style>
+  <title>Device Sensor Test</title>
 </head>
 <body>
-  <div class="fake-banner">
-    <span class="domain">example.com</span> wants to access your location
-    <div class="buttons">
-      <button class="btn allow" onclick="fakeAllow()">Allow</button>
-      <button class="btn deny" onclick="fakeDeny()">Block</button>
-    </div>
-  </div>
-
-  <div class="content">
-    <h2>Welcome to Example Page</h2>
-    <div id="loc" class="location-box">Location: not granted</div>
-  </div>
+  <h1>Device Motion & Orientation</h1>
+  <pre id="log"></pre>
 
   <script>
-    function fakeAllow() {
-      alert("⚠️ Fake 'Allow' clicked — user thinks location is shared!");
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          const { latitude, longitude } = pos.coords;
-          document.getElementById("loc").textContent =
-            "Real Location: " + latitude.toFixed(5) + ", " + longitude.toFixed(5);
-        },
-        err => {
-          document.getElementById("loc").textContent =
-            "Error / denied: " + err.message;
-        }
-      );
-    }
+    const log = document.getElementById("log");
 
-    function fakeDeny() {
-      alert("Fake 'Block' clicked — no real action taken");
-    }
+    window.addEventListener("devicemotion", (e) => {
+      log.innerText = "Acceleration:\n" + JSON.stringify(e.acceleration, null, 2);
+    });
+
+    window.addEventListener("deviceorientation", (e) => {
+      log.innerText += "\nOrientation:\n" + 
+        "alpha: " + e.alpha + ", beta: " + e.beta + ", gamma: " + e.gamma;
+    });
   </script>
 </body>
 </html>
