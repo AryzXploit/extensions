@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>EXP Keys Probe</title></head>
+<body>
+<h3>Probe ExpressVPN extension (ID: fgdd...gpe)</h3>
+<script>
+  window.addEventListener('message', (e) => {
+    console.log("[POC] got message from", e.origin, e.data);
+  }, false);
+
+  // kirim probe safe
+  setTimeout(() => {
+    window.postMessage({type: "EXP_KEYS_PROBE", action: "probe", id: "poc-01"}, "*");
+    console.log("[POC] probe posted");
+  }, 500);
+</script>
+</body>
+</html>
