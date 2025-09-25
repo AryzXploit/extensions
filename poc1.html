@@ -1,54 +1,72 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>MiBrowser UXSS PoC - pelioro</title>
+<title>Mi Browser UXSS PoC — pelioro</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial;padding:18px}
+  pre{white-space:pre-wrap;background:#f7f7f7;padding:12px;border-radius:8px}
+  .ok{color:green}
+  .err{color:#b00}
+</style>
+<h2>Mi Browser UXSS PoC — safe calls</h2>
+<p>Ini PoC non-destruktif. Nunggu hasil panggilan window.miui (jika ada).</p>
+<pre id="out">Starting…</pre>
 <script>
-(async function(){
-  function show(id, text){
-    var el = document.getElementById(id) || document.body.appendChild(document.createElement('pre'));
-    el.id = id;
-    el.style.whiteSpace = "pre-wrap";
-    el.textContent = (el.textContent ? el.textContent + "\n\n" : "") + text;
+(function(){
+  const out = id => document.getElementById('out');
+  function log(s){ out.textContent += '\\n' + s; console.log(s); }
+  function safeJSON(v){
+    try { return JSON.stringify(v); } catch(e) { return String(v); }
   }
 
   try {
     if (typeof window.miui === 'object') {
-      show('out', 'window.miui is OBJECT — trying safe calls...\n');
+      log('window.miui FOUND — attempting safe calls…');
 
+      // getLanguage
       try {
         if (typeof window.miui.getLanguage === 'function') {
-          let lang = window.miui.getLanguage();
-          show('out', 'getLanguage() => ' + String(lang));
-        } else show('out', 'getLanguage() not callable');
-      } catch(e) { show('out', 'getLanguage() threw: ' + e); }
+          const lang = window.miui.getLanguage();
+          log('getLanguage() => ' + String(lang));
+        } else log('getLanguage() not callable');
+      } catch(e){ log('getLanguage() threw: ' + e); }
 
+      // getRegion
       try {
         if (typeof window.miui.getRegion === 'function') {
-          let region = window.miui.getRegion();
-          show('out', 'getRegion() => ' + String(region));
-        } else show('out', 'getRegion() not callable');
-      } catch(e) { show('out', 'getRegion() threw: ' + e); }
+          const reg = window.miui.getRegion();
+          log('getRegion() => ' + String(reg));
+        } else log('getRegion() not callable');
+      } catch(e){ log('getRegion() threw: ' + e); }
 
+      // isNightModeEnabled
       try {
         if (typeof window.miui.isNightModeEnabled === 'function') {
-          let nm = window.miui.isNightModeEnabled();
-          show('out', 'isNightModeEnabled() => ' + String(nm));
-        } else show('out', 'isNightModeEnabled() not callable');
-      } catch(e) { show('out', 'isNightModeEnabled() threw: ' + e); }
+          const nm = window.miui.isNightModeEnabled();
+          log('isNightModeEnabled() => ' + String(nm));
+        } else log('isNightModeEnabled() not callable');
+      } catch(e){ log('isNightModeEnabled() threw: ' + e); }
 
-      // safe: inspect keys + attempt to call only safe-sounding functions
+      // getApplicationInfo (may return object)
       try {
         if (typeof window.miui.getApplicationInfo === 'function') {
-          let info = window.miui.getApplicationInfo();
-          try { show('out', 'getApplicationInfo() => ' + JSON.stringify(info)); }
-          catch(_) { show('out', 'getApplicationInfo() => [non-serializable value]'); }
-        } else show('out', 'getApplicationInfo() not callable');
-      } catch(e) { show('out', 'getApplicationInfo() threw: ' + e); }
+          const info = window.miui.getApplicationInfo();
+          log('getApplicationInfo() => ' + safeJSON(info));
+        } else log('getApplicationInfo() not callable');
+      } catch(e){ log('getApplicationInfo() threw: ' + e); }
 
+      // final alert for screenshot
+      setTimeout(()=> {
+        try {
+          alert('MIUI-POC done — check page for details');
+        } catch(e){}
+      }, 300);
     } else {
-      show('out', 'window.miui NOT found on this page');
+      log('window.miui NOT FOUND on this page');
+      alert('MIUI-POC: window.miui NOT FOUND');
     }
   } catch(err) {
-    show('out', 'top-level error: ' + err);
+    log('TOP ERROR: ' + err);
+    alert('MIUI-POC ERROR: ' + err);
   }
 })();
 </script>
